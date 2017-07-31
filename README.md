@@ -21,65 +21,9 @@ ip address
 
 ## Installation
 
- * Copy the new action script to your /etc/fail2ban/action.d/
- * Copy the f2b\_whitelist script into an executable location(e. g. /usr/local/bin)
- * Create a new jail in jails.conf called [whitelist-something],
-   like these examples:
-
-```
-[whitelist-courier]
-enabled   = true
-filter    = courier-login-ok
-maxretry  = 1
-action    = whitelist
-bantime   = 86400
-findtime  = 86400
-logpath   = /var/log/mail.log
-
-[whitelist-postfix-sasl]
-enabled   = true
-filter    = postfix-sasl-login-ok
-maxretry  = 1
-action    = whitelist
-bantime   = 86400
-findtime  = 86400
-logpath   = /var/log/mail.log
-```
-
-  * Copy/Create your filter definitions like these:
-
-Example for successful postfix-sasl authentication:
-
-```
-[INCLUDES]
-
-before = common.conf
-
-[Definition]
-
-logpath = /var/log/mail.log
-ignoreregex = 
-
-_daemon = postfix/smtpd
-
-failregex = ^%(__prefix_line)s[A-F0-9]+: client=[^[]+\[<HOST>\], sasl_method=[^,]+, sasl_username=
-
-```
-
-Example for successful courier imap/pop3 authentication:
-
-```
-[INCLUDES]
-
-before = common.conf
-
-[Definition]
-logpath = /var/log/mail.log
-_daemon = courier-(imap|pop3)[ds]
-failregex = ^%(__prefix_line)sLOGIN, user=[^@]+@[^,]+, ip=\[(.*:)*<HOST>\]
-ignoreregex = 
-```
-  * restart fail2ban 
+ * Copy directories action.d, jail.d and filter.d into your fail2ban-config-directory
+ * Copy the f2b\_whitelist script into an executable location(e. g. /usr/local/bin), and chmod +rx
+ * Enable the desired whitelist-jails in jail.d (set enabled=true
 
 ## Why not use iptables?
 
