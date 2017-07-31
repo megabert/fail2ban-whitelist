@@ -28,3 +28,8 @@ iptables can slow down the networking, if there are too many rules. So I decided
 ## Caveats
 
 Beware that there are solutions around that enable rising ban times upon repeated Ban-Entries in fail2ban.log, so that repeating violations get higher ban times. Make sure, if you have such measures in place to modify the detection expression, so the whitelisting does not lead to the opposite of the expected and the whitelisted ips get blocked instead.
+
+Something like that:
+
+  * http://blog.shanock.com/fail2ban-increased-ban-times-for-repeat-offenders/ or
+  * https://wiki.meurisse.org/wiki/Fail2Ban#Recidive
