@@ -1,0 +1,67 @@
+#!/bin/bash
+
+PROC_F2B_CLIENT=/usr/bin/fail2ban-client
+         LC_ALL=C
+   ACTIVE_JAILS=""
+
+         ACTION="$1"
+             IP="$2"
+
+export LC_ALL ACTIVE_JAILS PROC_F2B_CLIENT
+
+usage() {
+
+        echo -e "\n$(basename $0) : Global whitelisting of fail2ban ip addresses\n"
+        echo -e "Usage: $(basename $0) (add|remove) [<IP_ADDRESS>]\n"
+        echo -e "   add    <IP_ADDRESS> : add ip to the whitelists"
+        echo -e "   remove <IP_ADDRESS> : remove ip from the whitelists\n"
+
+        exit 1
+
+}
+
+get_active_jails() { 
+        if [ -z "$ACTIVE_JAILS" ] ; then 
+                ACTIVE_JAILS="$($PROC_F2B_CLIENT status| grep "Jail list" | /usr/bin/awk -F: '{print $2}'| tr -d ',' )"
+        fi
+}
+
+f2b_whitelist_ip_add_all_jails() {
+
+        local IP="$1"
+        IP_RE="${IP//./\.}"
+        get_active_jails
+
+        for JAIL in $ACTIVE_JAILS ;do
+                # only add if not already present
+                $PROC_F2B_CLIENT get "$JAIL" ignoreip 2>&1 | grep -Ewq "$IP_RE" || \
+                        $PROC_F2B_CLIENT set "$JAIL" addignoreip "$IP" 
+        done >/dev/null
+}
+
+f2b_whitelist_ip_remove_all_jails() {
+
+        local IP="$1"
+        IP_RE="${IP//./\.}"
+        get_active_jails
+
+        for JAIL in $ACTIVE_JAILS ;do
+                # only add if not already present
+                $PROC_F2B_CLIENT get "$JAIL" ignoreip 2>&1 | grep -Ewq "$IP_RE" && \
+                        $PROC_F2B_CLIENT set "$JAIL" delignoreip "$IP" 
+        done >/dev/null
+}
+
+# --- main program starts here ---
+
+[[ $1 =~ ^(add|remove|init)$ ]] || usage
+
+(
+    # Wait for lock on /var/lock/.myscript.exclusivelock (fd 200) for 10 seconds
+    /usr/bin/flock -w 10 -n 200 || echo "Giving up waiting for another whitelisting process"
+    case $ACTION in
+        add)            f2b_whitelist_ip_add_all_jails    "$IP" ;; 
+        remove)         f2b_whitelist_ip_remove_all_jails "$IP" ;;
+    esac
+
+) 200>/var/lock/.fail2ban.whitelist
