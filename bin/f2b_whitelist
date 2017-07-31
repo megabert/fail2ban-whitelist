@@ -54,7 +54,7 @@ f2b_whitelist_ip_remove_all_jails() {
 
 # --- main program starts here ---
 
-[[ $1 =~ ^(add|remove|init)$ ]] || usage
+[[ $1 =~ ^(add|remove)$ ]] || usage
 
 (
     # Wait for lock on /var/lock/.myscript.exclusivelock (fd 200) for 10 seconds
