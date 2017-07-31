@@ -89,9 +89,8 @@ use dynamic fail2ban whitelisting.
 
 ## ToDo
 
-The script is somewhat slow. It takes about
-1 Sek to add/remove the address from/to the
-list.
+  * The script is somewhat slow. It takes about 1 Sek to add/remove the address from/to the list.
+  * Every whitelister has does additional parsing of mail.log. This can be done in a single instance
 
 ## Caveats
 
